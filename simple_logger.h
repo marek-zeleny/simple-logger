@@ -7,7 +7,7 @@
 #include <source_location>
 #include <chrono>
 
-namespace tiny_logger {
+namespace simple_logger {
 
 enum class LogLevel : uint8_t {
     Debug = 0,
@@ -16,7 +16,7 @@ enum class LogLevel : uint8_t {
     Error = 3,
 };
 
-struct TinyLoggerConfig {
+struct SimpleLoggerConfig {
 #ifdef NDEBUG
     static constexpr LogLevel logLevel{LogLevel::Info};
 #else
@@ -27,9 +27,9 @@ struct TinyLoggerConfig {
 };
 
 template<LogLevel Level>
-class TinyLogger {
+class SimpleLogger {
 public:
-    explicit TinyLogger(std::ostream &stream, const std::source_location location = std::source_location::current()) :
+    explicit SimpleLogger(std::ostream &stream, const std::source_location location = std::source_location::current()) :
             m_stream(stream) {
         *this << "[";
         print_time();
@@ -39,13 +39,13 @@ public:
         *this << "[" << location.function_name() << "] ";
     }
 
-    ~TinyLogger() {
+    ~SimpleLogger() {
         *this << std::endl;
     }
 
     template<typename T>
-    TinyLogger &operator<<(const T &token) {
-        if constexpr (Level <= TinyLoggerConfig::logLevel) {
+    SimpleLogger &operator<<(const T &token) {
+        if constexpr (Level <= SimpleLoggerConfig::logLevel) {
             m_stream << token;
         }
         return *this;
@@ -58,7 +58,7 @@ private:
         auto now = std::chrono::high_resolution_clock::now();
         auto time_since_epoch = now.time_since_epoch();
         auto h = std::chrono::duration_cast<std::chrono::hours>(time_since_epoch).count() % 24
-                + TinyLoggerConfig::timezoneAdjustment;
+                + SimpleLoggerConfig::timezoneAdjustment;
         auto min = std::chrono::duration_cast<std::chrono::minutes>(time_since_epoch).count() % 60;
         auto s = std::chrono::duration_cast<std::chrono::seconds>(time_since_epoch).count() % 60;
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_since_epoch).count() % 100;
@@ -82,10 +82,10 @@ private:
     }
 };
 
-} // tiny_logger
+} // simple_logger
 
-#define TINY_LOGGER_LOG(level, stream) tiny_logger::TinyLogger<tiny_logger::LogLevel::level>(stream)
-#define LOG_DEBUG TINY_LOGGER_LOG(Debug, tiny_logger::TinyLoggerConfig::logFile)
-#define LOG_INFO TINY_LOGGER_LOG(Info, tiny_logger::TinyLoggerConfig::logFile)
-#define LOG_WARNING TINY_LOGGER_LOG(Warning, tiny_logger::TinyLoggerConfig::logFile)
-#define LOG_ERROR TINY_LOGGER_LOG(Error, tiny_logger::TinyLoggerConfig::logFile)
+#define SIMPLE_LOGGER_LOG(level, stream) simple_logger::SimpleLogger<simple_logger::LogLevel::level>(stream)
+#define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug, simple_logger::SimpleLoggerConfig::logFile)
+#define LOG_INFO SIMPLE_LOGGER_LOG(Info, simple_logger::SimpleLoggerConfig::logFile)
+#define LOG_WARNING SIMPLE_LOGGER_LOG(Warning, simple_logger::SimpleLoggerConfig::logFile)
+#define LOG_ERROR SIMPLE_LOGGER_LOG(Error, simple_logger::SimpleLoggerConfig::logFile)
