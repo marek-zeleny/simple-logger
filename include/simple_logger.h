@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    static constexpr bool is_active{Level <= SimpleLoggerConfig::logLevel};
+    static constexpr bool is_active{Level >= SimpleLoggerConfig::logLevel};
     static inline std::ostream null_stream{nullptr};
     std::ostream &m_stream;
 
