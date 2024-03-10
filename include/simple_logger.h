@@ -17,14 +17,35 @@ enum class LogLevel : uint8_t {
     Error = 3,
 };
 
-struct SimpleLoggerConfig {
+inline constexpr std::string logLevelToString(LogLevel level) {
+    switch (level) {
+        case LogLevel::Debug: return "Debug";
+        case LogLevel::Info: return "Info";
+        case LogLevel::Warning: return "Warning";
+        case LogLevel::Error: return "Error";
+        default: return "Unknown";
+    }
+}
+
+class SimpleLoggerConfig {
+public:
 #ifdef NDEBUG
     static constexpr LogLevel logLevel{LogLevel::Info};
 #else
     static constexpr LogLevel logLevel{LogLevel::Debug};
 #endif
     static constexpr long timezoneAdjustment{0};
-    static inline std::ofstream logFile{"dp.log"};
+    static inline std::string logFileName{logLevelToString(logLevel) + ".log"};
+
+    static std::ofstream &getLogFile() {
+        if (!logFile.is_open()) {
+            logFile = std::ofstream(logFileName);
+        }
+        return logFile;
+    }
+
+private:
+    static inline std::ofstream logFile;
 };
 
 template<LogLevel Level>
@@ -35,9 +56,7 @@ public:
         if constexpr (is_active) {
             *this << "[";
             print_time();
-            *this << "][";
-            print_log_level();
-            *this << "][";
+            *this << "][" << logLevelToString(Level) << "][";
             print_file_name(location.file_name());
             *this << ":" << location.line() << "]";
             *this << "[" << location.function_name() << "] ";
@@ -82,18 +101,6 @@ private:
               << std::setfill('0') << std::setw(3) << ms;
     }
 
-    void print_log_level() {
-        if constexpr (Level == LogLevel::Debug) {
-            *this << "Debug";
-        } else if constexpr (Level == LogLevel::Info) {
-            *this << "Info";
-        } else if constexpr (Level == LogLevel::Warning) {
-            *this << "Warning";
-        } else if constexpr (Level == LogLevel::Error) {
-            *this << "Error";
-        }
-    }
-
     void print_file_name(const char* file_path) {
         const char* slash_position = std::strrchr(file_path, '/');
         if (slash_position != nullptr) {
@@ -107,15 +114,15 @@ private:
 } // simple_logger
 
 #define SIMPLE_LOGGER_LOG(level, stream) simple_logger::SimpleLogger<simple_logger::LogLevel::level>(stream)
-#define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug, simple_logger::SimpleLoggerConfig::logFile)
-#define LOG_INFO SIMPLE_LOGGER_LOG(Info, simple_logger::SimpleLoggerConfig::logFile)
-#define LOG_WARNING SIMPLE_LOGGER_LOG(Warning, simple_logger::SimpleLoggerConfig::logFile)
-#define LOG_ERROR SIMPLE_LOGGER_LOG(Error, simple_logger::SimpleLoggerConfig::logFile)
+#define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug, simple_logger::SimpleLoggerConfig::getLogFile())
+#define LOG_INFO SIMPLE_LOGGER_LOG(Info, simple_logger::SimpleLoggerConfig::getLogFile())
+#define LOG_WARNING SIMPLE_LOGGER_LOG(Warning, simple_logger::SimpleLoggerConfig::getLogFile())
+#define LOG_ERROR SIMPLE_LOGGER_LOG(Error, simple_logger::SimpleLoggerConfig::getLogFile())
 
 #define GET_LOG_STREAM(level, stream, name) \
     simple_logger::SimpleLogger<simple_logger::LogLevel::level> _sl_logger(stream); \
     std::ostream &name = _sl_logger.get_stream()
-#define GET_LOG_STREAM_DEBUG(name) GET_LOG_STREAM(Debug, simple_logger::SimpleLoggerConfig::logFile, name)
-#define GET_LOG_STREAM_INFO(name) GET_LOG_STREAM(Info, simple_logger::SimpleLoggerConfig::logFile, name)
-#define GET_LOG_STREAM_WARNING(name) GET_LOG_STREAM(Warning, simple_logger::SimpleLoggerConfig::logFile, name)
-#define GET_LOG_STREAM_ERROR(name) GET_LOG_STREAM(Error, simple_logger::SimpleLoggerConfig::logFile, name)
+#define GET_LOG_STREAM_DEBUG(name) GET_LOG_STREAM(Debug, simple_logger::SimpleLoggerConfig::getLogFile(), name)
+#define GET_LOG_STREAM_INFO(name) GET_LOG_STREAM(Info, simple_logger::SimpleLoggerConfig::getLogFile(), name)
+#define GET_LOG_STREAM_WARNING(name) GET_LOG_STREAM(Warning, simple_logger::SimpleLoggerConfig::getLogFile(), name)
+#define GET_LOG_STREAM_ERROR(name) GET_LOG_STREAM(Error, simple_logger::SimpleLoggerConfig::getLogFile(), name)
