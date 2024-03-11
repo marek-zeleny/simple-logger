@@ -27,7 +27,7 @@ inline constexpr std::string logLevelToString(LogLevel level) {
     }
 }
 
-class SimpleLoggerConfig {
+class Config {
 public:
 #ifdef NDEBUG
     static constexpr LogLevel logLevel{LogLevel::Info};
@@ -49,9 +49,9 @@ private:
 };
 
 template<LogLevel Level>
-class SimpleLogger {
+class Logger {
 public:
-    explicit SimpleLogger(std::ostream &stream, const std::source_location location = std::source_location::current()) :
+    explicit Logger(std::ostream &stream, const std::source_location location = std::source_location::current()) :
             m_stream(is_active ? stream : null_stream) {
         if constexpr (is_active) {
             *this << "[";
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    ~SimpleLogger() {
+    ~Logger() {
         if constexpr (is_active) {
             m_stream << std::endl;
         }
@@ -74,7 +74,7 @@ public:
     }
 
     template<typename T>
-    SimpleLogger &operator<<(const T &token) {
+    Logger &operator<<(const T &token) {
         if constexpr (is_active) {
             m_stream << token;
         }
@@ -82,7 +82,7 @@ public:
     }
 
 private:
-    static constexpr bool is_active{Level >= SimpleLoggerConfig::logLevel};
+    static constexpr bool is_active{Level >= Config::logLevel};
     static inline std::ostream null_stream{nullptr};
     std::ostream &m_stream;
 
@@ -90,7 +90,7 @@ private:
         auto now = std::chrono::high_resolution_clock::now();
         auto time_since_epoch = now.time_since_epoch();
         auto h = std::chrono::duration_cast<std::chrono::hours>(time_since_epoch).count() % 24
-                + SimpleLoggerConfig::timezoneAdjustment;
+                + Config::timezoneAdjustment;
         auto min = std::chrono::duration_cast<std::chrono::minutes>(time_since_epoch).count() % 60;
         auto s = std::chrono::duration_cast<std::chrono::seconds>(time_since_epoch).count() % 60;
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_since_epoch).count() % 100;
@@ -113,16 +113,16 @@ private:
 
 } // simple_logger
 
-#define SIMPLE_LOGGER_LOG(level, stream) simple_logger::SimpleLogger<simple_logger::LogLevel::level>(stream)
-#define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug, simple_logger::SimpleLoggerConfig::getLogFile())
-#define LOG_INFO SIMPLE_LOGGER_LOG(Info, simple_logger::SimpleLoggerConfig::getLogFile())
-#define LOG_WARNING SIMPLE_LOGGER_LOG(Warning, simple_logger::SimpleLoggerConfig::getLogFile())
-#define LOG_ERROR SIMPLE_LOGGER_LOG(Error, simple_logger::SimpleLoggerConfig::getLogFile())
+#define SIMPLE_LOGGER_LOG(level, stream) simple_logger::Logger<simple_logger::LogLevel::level>(stream)
+#define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug, simple_logger::Config::getLogFile())
+#define LOG_INFO SIMPLE_LOGGER_LOG(Info, simple_logger::Config::getLogFile())
+#define LOG_WARNING SIMPLE_LOGGER_LOG(Warning, simple_logger::Config::getLogFile())
+#define LOG_ERROR SIMPLE_LOGGER_LOG(Error, simple_logger::Config::getLogFile())
 
 #define GET_LOG_STREAM(level, stream, name) \
-    simple_logger::SimpleLogger<simple_logger::LogLevel::level> _sl_logger(stream); \
+    simple_logger::Logger<simple_logger::LogLevel::level> _sl_logger(stream); \
     std::ostream &name = _sl_logger.get_stream()
-#define GET_LOG_STREAM_DEBUG(name) GET_LOG_STREAM(Debug, simple_logger::SimpleLoggerConfig::getLogFile(), name)
-#define GET_LOG_STREAM_INFO(name) GET_LOG_STREAM(Info, simple_logger::SimpleLoggerConfig::getLogFile(), name)
-#define GET_LOG_STREAM_WARNING(name) GET_LOG_STREAM(Warning, simple_logger::SimpleLoggerConfig::getLogFile(), name)
-#define GET_LOG_STREAM_ERROR(name) GET_LOG_STREAM(Error, simple_logger::SimpleLoggerConfig::getLogFile(), name)
+#define GET_LOG_STREAM_DEBUG(name) GET_LOG_STREAM(Debug, simple_logger::Config::getLogFile(), name)
+#define GET_LOG_STREAM_INFO(name) GET_LOG_STREAM(Info, simple_logger::Config::getLogFile(), name)
+#define GET_LOG_STREAM_WARNING(name) GET_LOG_STREAM(Warning, simple_logger::Config::getLogFile(), name)
+#define GET_LOG_STREAM_ERROR(name) GET_LOG_STREAM(Error, simple_logger::Config::getLogFile(), name)
