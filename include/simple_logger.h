@@ -192,6 +192,13 @@ private:
 } // simple_logger
 
 /**
+ * Comment out this definition to disable convenience macros if you don't like them.
+ */
+#define SIMPLE_LOGGER_ENABLE_MACROS
+
+#ifdef SIMPLE_LOGGER_ENABLE_MACROS
+
+/**
  * Log message on a given level to default output stream with a single stream chain.
  */
 #define SIMPLE_LOGGER_LOG(level) simple_logger::Logger<simple_logger::LogLevel::level>( \
@@ -248,3 +255,5 @@ private:
  * Create a local instance of an error logger and get the logger's default stream as a variable of given name.
  */
 #define GET_LOG_STREAM_ERROR(name) GET_LOG_STREAM(Error, name)
+
+#endif // SIMPLE_LOGGER_ENABLE_MACROS
