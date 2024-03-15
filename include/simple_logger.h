@@ -73,6 +73,11 @@ public:
 #endif
 
     /**
+     * If true, each log contains function signature, otherwise only file and line are logged.
+     */
+    static constexpr bool includeFunctionSignature{true};
+
+    /**
      * If you need precise time information adjusted for timezone, use this variable to add/subtract hours.
      */
     static constexpr long timezoneAdjustment{0};
@@ -134,7 +139,10 @@ public:
             *this << "][" << logLevelToString(Level) << "][";
             printFileName(location.file_name());
             *this << ":" << location.line() << "]";
-            *this << "[" << location.function_name() << "] ";
+            if constexpr (Config::includeFunctionSignature) {
+                *this << "[" << location.function_name() << "]";
+            }
+            *this << " ";
         }
     }
 
