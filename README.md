@@ -147,6 +147,7 @@ These config options include:
 
 - Logger verbosity (`logLevel`)
   - Can be set separately for debug and release builds using predefined macros
+- Function signature included in logs (can be turned off for shorter log prefix)
 - Timezone adjustment if you want to see real time in the logs
 - Log file name
   - Can be adjusted from code, useful e.g. to have a different file for application and for unit tests
