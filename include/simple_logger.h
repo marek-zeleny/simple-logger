@@ -75,7 +75,7 @@ public:
     /**
      * If true, each log contains function signature, otherwise only file and line are logged.
      */
-    static constexpr bool includeFunctionSignature{true};
+    static constexpr bool includeFunctionSignature{false};
 
     /**
      * If you need precise time information adjusted for timezone, use this variable to add/subtract hours.
