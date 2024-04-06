@@ -41,7 +41,7 @@ enum class LogLevel : uint8_t {
     Error = 3,
 };
 
-inline constexpr std::string logLevelToString(LogLevel level) {
+inline constexpr const char *logLevelToString(LogLevel level) {
     switch (level) {
         case LogLevel::Debug: return "Debug";
         case LogLevel::Info: return "Info";
@@ -85,7 +85,7 @@ public:
     /**
      * If logging to file is used, set this variable to the desired log file path/name.
      */
-    static inline std::string logFileName{logLevelToString(logLevel) + ".log"};
+    static inline std::string logFileName{std::string(logLevelToString(logLevel)) + ".log"};
 
     /**
      * Determines the default stream for each log level where output will be printed.
