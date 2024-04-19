@@ -130,6 +130,8 @@ private:
 template<LogLevel Level>
 class Log {
 public:
+    static constexpr bool isActive{Level >= Config::logLevel};
+
     explicit Log(std::ostream &stream = Config::getDefaultStream<Level>(),
             const std::source_location location = std::source_location::current()) :
             m_stream(isActive ? stream : nullStream) {
@@ -165,7 +167,6 @@ public:
     }
 
 private:
-    static constexpr bool isActive{Level >= Config::logLevel};
     static inline std::ostream nullStream{nullptr};
     std::ostream &m_stream;
 
