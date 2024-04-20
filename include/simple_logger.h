@@ -35,14 +35,16 @@
 namespace simple_logger {
 
 enum class LogLevel : uint8_t {
-    Debug = 0,
-    Info = 1,
-    Warning = 2,
-    Error = 3,
+    Trace = 0,
+    Debug,
+    Info,
+    Warning,
+    Error,
 };
 
 inline constexpr const char *logLevelToString(LogLevel level) {
     switch (level) {
+        case LogLevel::Trace: return "Trace";
         case LogLevel::Debug: return "Debug";
         case LogLevel::Info: return "Info";
         case LogLevel::Warning: return "Warning";
@@ -215,6 +217,11 @@ private:
 #define SIMPLE_LOGGER_LOG(level) simple_logger::Log<simple_logger::LogLevel::level>()
 
 /**
+ * Log a trace message with a single stream chain.
+ */
+#define LOG_TRACE SIMPLE_LOGGER_LOG(Trace)
+
+/**
  * Log a debug message with a single stream chain.
  */
 #define LOG_DEBUG SIMPLE_LOGGER_LOG(Debug)
@@ -242,6 +249,11 @@ private:
  */
 #define GET_LOG_STREAM(level, name) \
     simple_logger::Log<simple_logger::LogLevel::level> _sl_log{}; std::ostream &name = _sl_log.getStream()
+
+/**
+ * Create a local instance of a debug log and get the logger's default stream as a variable of given name.
+ */
+#define GET_LOG_STREAM_TRACE(name) GET_LOG_STREAM(Trace, name)
 
 /**
  * Create a local instance of a debug log and get the logger's default stream as a variable of given name.
