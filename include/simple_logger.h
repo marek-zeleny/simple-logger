@@ -214,7 +214,8 @@ private:
 /**
  * Log message on a given level to default output stream with a single stream chain.
  */
-#define SIMPLE_LOGGER_LOG(level) simple_logger::Log<simple_logger::LogLevel::level>()
+#define SIMPLE_LOGGER_LOG(level) if constexpr(simple_logger::Log<simple_logger::LogLevel::level>::isActive) \
+    simple_logger::Log<simple_logger::LogLevel::level>()
 
 /**
  * Log a trace message with a single stream chain.
